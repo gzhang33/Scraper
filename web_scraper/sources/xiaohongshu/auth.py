@@ -12,6 +12,20 @@ from .config import SOURCE_NAME, EXPLORE_URL, COOKIE_PATH, Selectors
 console = Console()
 
 
+async def _dismiss_cookie_banner(page: Page) -> None:
+    """Dismiss cookie consent so it does not intercept clicks (see search scraper)."""
+    try:
+        await page.evaluate(
+            """() => {
+                document.querySelector(".cookie-banner__btn--primary")?.click()
+                    || document.querySelector(".cookie-banner button")?.click();
+            }"""
+        )
+        await random_delay(0.3, 0.6)
+    except Exception:
+        pass
+
+
 class AuthManager:
     """Manages authentication for Xiaohongshu."""
 
@@ -71,13 +85,14 @@ class AuthManager:
 
             await page.goto(EXPLORE_URL, wait_until="domcontentloaded")
             await random_delay(2.0, 3.0)
+            await _dismiss_cookie_banner(page)
 
             login_modal = await page.query_selector(Selectors.PHONE_LOGIN_TEXT)
 
             if not login_modal:
                 login_btn = await page.query_selector(Selectors.LOGIN_BUTTON)
                 if login_btn:
-                    await login_btn.click()
+                    await login_btn.click(force=True)
                     await random_delay(1.0, 2.0)
 
             await page.wait_for_selector(Selectors.PHONE_LOGIN_TEXT, timeout=15000)
@@ -147,13 +162,14 @@ class AuthManager:
         try:
             await page.goto(EXPLORE_URL, wait_until="domcontentloaded")
             await random_delay(2.0, 3.0)
+            await _dismiss_cookie_banner(page)
 
             login_modal = await page.query_selector(Selectors.LOGIN_MODAL)
 
             if not login_modal:
                 login_btn = await page.query_selector(Selectors.LOGIN_BUTTON)
                 if login_btn:
-                    await login_btn.click()
+                    await login_btn.click(force=True)
                     await random_delay(1.0, 2.0)
 
             await page.wait_for_selector(Selectors.QR_CODE_TEXT, timeout=15000)

@@ -75,6 +75,7 @@ All notable changes to this project will be documented in this file.
   - 方便 AI 在调用 `wsj_search` 前了解可用选项
 
 ### Fixed
+- **小红书 QR / 手机号登录** - 探索页 Cookie 同意层（`.cookie-banner-overlay`）拦截「登录」点击导致 Playwright 报错；在 `login_with_qrcode` / `login_with_phone` 中于点击登录前调用与搜索爬虫一致的 Cookie 条 dismiss（`evaluate` 点击主按钮），并对登录按钮使用 `click(force=True)` 降低遮罩干扰
 - **WSJ 搜索参数修正** - 通过 Playwright 实际探索 WSJ 搜索页面验证正确的 URL 参数值
   - 日期范围参数：
     - `week`: `1w` → `7d`
